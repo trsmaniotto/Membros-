@@ -3,477 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Membros da Igreja</title>
+    <title>Gerenciamento de Membros</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .dark-mode {
-            background-color: #333;
-            color: #f4f4f4;
-        }
-        h1 {
-            text-align: center;
-            color: #4CAF50;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-        .filters select, .filters input {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .filters button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .filters button:hover {
-            background-color: #45a049;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .status-sim {
-            color: green;
-        }
-        .status-nao {
-            color: red;
-        }
-        .whatsapp-btn {
-            background-color: #25D366;
-            color: white;
-            padding: 5px 10px;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-        .whatsapp-btn:hover {
-            background-color: #128C7E;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .pagination button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .pagination button:hover {
-            background-color: #45a049;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 8px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover {
-            color: black;
-            cursor: pointer;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        form label {
-            margin-top: 10px;
-        }
-        form input, form select {
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        form button {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        form button:hover {
-            background-color: #45a049;
-        }
-        .dark-mode-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .dark-mode-toggle:hover {
-            background-color: #45a049;
-        }
-        @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-            }
-            table {
-                font-size: 14px;
-            }
-            th, td {
-                padding: 8px;
-            }
-        }
+        body { background-color: #f8f9fa; }
+        .table-responsive { max-height: 70vh; overflow-y: auto; }
+        .checkmark { color: green; font-size: 1.2em; }
+        .crossmark { color: red; font-size: 1.2em; }
+        .btn-success { background-color: #28a745; border-color: #28a745; }
+        .btn-success:hover { background-color: #218838; border-color: #1e7e34; }
+        .spinner-border { width: 3rem; height: 3rem; }
+        .whatsapp-btn { background-color: #25d366; border-color: #25d366; }
+        .whatsapp-btn:hover { background-color: #128c7e; border-color: #128c7e; }
     </style>
 </head>
 <body>
-    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
-    <div class="container">
-        <h1>Gerenciamento de Membros da Igreja</h1>
-        <div class="filters">
-            <select id="groupFilter">
-                <option value="">Todos os Grupos</option>
-                <option value="Líder Hub">Líder Hub</option>
-                <option value="Hype">Hype</option>
-                <option value="Play">Play</option>
-            </select>
-            <select id="courseFilter">
-                <option value="">Todos os Cursos</option>
-                <option value="fundamento">Fundamento</option>
-                <option value="imersao">Imersão</option>
-                <option value="voce_na_verdade">Você na Verdade</option>
-                <option value="batismo">Batismo</option>
-                <option value="identidade">Identidade</option>
-                <option value="inspiracao">Inspiração</option>
-                <option value="dch">DCH</option>
-                <option value="nt">NT</option>
-                <option value="rendicao">Rendição</option>
-            </select>
-            <input type="text" id="nameSearch" placeholder="Buscar por nome">
-            <button onclick="applyFilters()">Aplicar Filtros</button>
-            <button onclick="clearFilters()">Limpar Filtros</button>
-            <button onclick="openModal()">Adicionar Membro</button>
+    <div class="container-fluid mt-4">
+        <h1 class="text-center mb-4"><i class="fas fa-users"></i> Gerenciamento de Membros</h1>
+        
+        <!-- Filtros -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="groupFilter" class="form-label">Filtrar por Grupo:</label>
+                <select id="groupFilter" class="form-select">
+                    <option value="">Todos os Grupos</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="courseFilter" class="form-label">Filtrar por Curso:</label>
+                <select id="courseFilter" class="form-select">
+                    <option value="">Todos os Cursos</option>
+                    <option value="fundamento">Fundamento</option>
+                    <option value="imersao">Imersão</option>
+                    <option value="voce_na_verdade">Você na Verdade</option>
+                    <option value="batismo">Batismo</option>
+                    <option value="identidade">Identidade</option>
+                    <option value="inspiracao">Inspiração</option>
+                    <option value="dch">DCH</option>
+                    <option value="nt">NT</option>
+                    <option value="rendicao">Rendição</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="nameSearch" class="form-label">Buscar por Nome:</label>
+                <input type="text" id="nameSearch" class="form-control" placeholder="Digite o nome...">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button id="applyFilters" class="btn btn-success me-2"><i class="fas fa-filter"></i> Aplicar Filtros</button>
+                <button id="clearFilters" class="btn btn-secondary"><i class="fas fa-times"></i> Limpar Filtros</button>
+            </div>
         </div>
-        <table id="membersTable">
-            <thead>
-                <tr>
-                    <th>Nº Membro</th>
-                    <th>Nome</th>
-                    <th>Grupo</th>
-                    <th>Telefone</th>
-                    <th>Fundamento</th>
-                    <th>Imersão</th>
-                    <th>Você na Verdade</th>
-                    <th>Batismo</th>
-                    <th>Identidade</th>
-                    <th>Inspiração</th>
-                    <th>DCH</th>
-                    <th>NT</th>
-                    <th>Rendição</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="membersBody"></tbody>
-        </table>
-        <div class="pagination" id="pagination"></div>
-    </div>
-
-    <div id="memberModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle">Adicionar Membro</h2>
-            <form id="memberForm">
-                <label for="no_membro">Nº Membro:</label>
-                <input type="text" id="no_membro" name="no_membro" required>
-
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="nome" required>
-
-                <label for="grupo">Grupo:</label>
-                <select id="grupo" name="grupo" required>
-                    <option value="Líder Hub">Líder Hub</option>
-                    <option value="Hype">Hype</option>
-                    <option value="Play">Play</option>
-                </select>
-
-                <label for="telefone">Telefone:</label>
-                <input type="text" id="telefone" name="telefone" pattern="\d{10,11}" title="Apenas números, 10 ou 11 dígitos" required>
-
-                <label for="fundamento">Fundamento:</label>
-                <select id="fundamento" name="fundamento">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="imersao">Imersão:</label>
-                <select id="imersao" name="imersao">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="voce_na_verdade">Você na Verdade:</label>
-                <select id="voce_na_verdade" name="voce_na_verdade">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="batismo">Batismo:</label>
-                <select id="batismo" name="batismo">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="identidade">Identidade:</label>
-                <select id="identidade" name="identidade">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="inspiracao">Inspiração:</label>
-                <select id="inspiracao" name="inspiracao">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="dch">DCH:</label>
-                <select id="dch" name="dch">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="nt">NT:</label>
-                <select id="nt" name="nt">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <label for="rendicao">Rendição:</label>
-                <select id="rendicao" name="rendicao">
-                    <option value="">Não</option>
-                    <option value="Sim">Sim</option>
-                </select>
-
-                <button type="submit">Salvar</button>
-            </form>
+        
+        <!-- Contador -->
+        <div class="mb-3">
+            <p id="recordCounter">Registros encontrados: 0</p>
+        </div>
+        
+        <!-- Spinner de Carregamento -->
+        <div id="loadingSpinner" class="text-center mb-3" style="display: none;">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p>Carregando membros...</p>
+        </div>
+        
+        <!-- Mensagem de Erro -->
+        <div id="errorMessage" class="alert alert-danger" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i> Erro ao carregar os dados. Tente novamente.
+        </div>
+        
+        <!-- Tabela -->
+        <div class="table-responsive">
+            <table id="membersTable" class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nº Membro</th>
+                        <th>Nome</th>
+                        <th>Grupo</th>
+                        <th>Telefone</th>
+                        <th>Fundamento</th>
+                        <th>Imersão</th>
+                        <th>Você na Verdade</th>
+                        <th>Batismo</th>
+                        <th>Identidade</th>
+                        <th>Inspiração</th>
+                        <th>DCH</th>
+                        <th>NT</th>
+                        <th>Rendição</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="membersTableBody">
+                    <!-- Dados serão inseridos aqui -->
+                </tbody>
+            </table>
         </div>
     </div>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const apiUrl = 'https://script.google.com/macros/s/AKfycbwDp2g--eUjynwswAER_MBdKs59mTVsgdcbZcJHSgQsb_pC1lALgv670OT5GsL9roP_UQ/exec';
-        let members = [];
+        let allMembers = [];
         let filteredMembers = [];
-        let currentPage = 1;
-        const itemsPerPage = 10;
-
+        
+        // Carregar dados ao abrir a página
         document.addEventListener('DOMContentLoaded', loadMembers);
-
-        function loadMembers() {
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    members = data;
-                    filteredMembers = [...members];
-                    renderTable();
-                    renderPagination();
-                })
-                .catch(error => console.error('Erro ao carregar membros:', error));
+        
+        async function loadMembers() {
+            showSpinner();
+            hideError();
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Erro na resposta da API');
+                allMembers = await response.json();
+                filteredMembers = [...allMembers];
+                populateGroupDropdown();
+                renderTable(filteredMembers);
+                updateCounter(filteredMembers.length);
+            } catch (error) {
+                console.error('Erro ao carregar membros:', error);
+                showError();
+            } finally {
+                hideSpinner();
+            }
         }
-
-        function renderTable() {
-            const tbody = document.getElementById('membersBody');
+        
+        function populateGroupDropdown() {
+            const groups = [...new Set(allMembers.map(m => m.grupo).filter(g => g))];
+            const groupFilter = document.getElementById('groupFilter');
+            groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = group;
+                groupFilter.appendChild(option);
+            });
+        }
+        
+        function renderTable(members) {
+            const tbody = document.getElementById('membersTableBody');
             tbody.innerHTML = '';
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageMembers = filteredMembers.slice(start, end);
-
-            pageMembers.forEach(member => {
+            members.forEach(member => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${member.no_membro}</td>
-                    <td>${member.nome}</td>
-                    <td>${member.grupo}</td>
-                    <td><a href="https://wa.me/55${member.telefone}" class="whatsapp-btn" target="_blank">WhatsApp</a></td>
-                    <td class="${member.fundamento === 'Sim' ? 'status-sim' : 'status-nao'}">${member.fundamento === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.imersao === 'Sim' ? 'status-sim' : 'status-nao'}">${member.imersao === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.voce_na_verdade === 'Sim' ? 'status-sim' : 'status-nao'}">${member.voce_na_verdade === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.batismo === 'Sim' ? 'status-sim' : 'status-nao'}">${member.batismo === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.identidade === 'Sim' ? 'status-sim' : 'status-nao'}">${member.identidade === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.inspiracao === 'Sim' ? 'status-sim' : 'status-nao'}">${member.inspiracao === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.dch === 'Sim' ? 'status-sim' : 'status-nao'}">${member.dch === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.nt === 'Sim' ? 'status-sim' : 'status-nao'}">${member.nt === 'Sim' ? '✅' : '❌'}</td>
-                    <td class="${member.rendicao === 'Sim' ? 'status-sim' : 'status-nao'}">${member.rendicao === 'Sim' ? '✅' : '❌'}</td>
-                    <td>
-                        <button onclick="editMember('${member.no_membro}')">Editar</button>
-                        <button onclick="deleteMember('${member.no_membro}')">Deletar</button>
-                    </td>
+                    <td>${member.no_membro || ''}</td>
+                    <td>${member.nome || ''}</td>
+                    <td>${member.grupo || ''}</td>
+                    <td>${member.telefone || ''}</td>
+                    <td>${getIndicator(member.fundamento)}</td>
+                    <td>${getIndicator(member.imersao)}</td>
+                    <td>${getIndicator(member.voce_na_verdade)}</td>
+                    <td>${getIndicator(member.batismo)}</td>
+                    <td>${getIndicator(member.identidade)}</td>
+                    <td>${getIndicator(member.inspiracao)}</td>
+                    <td>${getIndicator(member.dch)}</td>
+                    <td>${getIndicator(member.nt)}</td>
+                    <td>${getIndicator(member.rendicao)}</td>
+                    <td><a href="https://wa.me/55${cleanPhone(member.telefone)}" target="_blank" class="btn whatsapp-btn btn-sm"><i class="fab fa-whatsapp"></i> WhatsApp</a></td>
                 `;
                 tbody.appendChild(row);
             });
         }
-
-        function renderPagination() {
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-            const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
-            for (let i = 1; i <= totalPages; i++) {
-                const button = document.createElement('button');
-                button.textContent = i;
-                button.onclick = () => {
-                    currentPage = i;
-                    renderTable();
-                };
-                pagination.appendChild(button);
-            }
+        
+        function getIndicator(value) {
+            return value === 'Sim' ? '<i class="fas fa-check checkmark"></i>' : '<i class="fas fa-times crossmark"></i>';
         }
-
+        
+        function cleanPhone(phone) {
+            return phone ? phone.replace(/\D/g, '') : '';
+        }
+        
+        function updateCounter(count) {
+            document.getElementById('recordCounter').textContent = `Registros encontrados: ${count}`;
+        }
+        
+        function showSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+        
+        function hideSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+        
+        function showError() {
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // Filtros
+        document.getElementById('applyFilters').addEventListener('click', applyFilters);
+        document.getElementById('clearFilters').addEventListener('click', clearFilters);
+        document.getElementById('nameSearch').addEventListener('input', applyFilters);
+        
         function applyFilters() {
             const group = document.getElementById('groupFilter').value;
             const course = document.getElementById('courseFilter').value;
             const name = document.getElementById('nameSearch').value.toLowerCase();
-
-            filteredMembers = members.filter(member => {
-                return (group === '' || member.grupo === group) &&
-                       (course === '' || member[course] === 'Sim') &&
-                       (name === '' || member.nome.toLowerCase().includes(name));
+            
+            filteredMembers = allMembers.filter(member => {
+                const matchesGroup = !group || member.grupo === group;
+                const matchesCourse = !course || member[course] === 'Sim';
+                const matchesName = !name || member.nome.toLowerCase().includes(name);
+                return matchesGroup && matchesCourse && matchesName;
             });
-            currentPage = 1;
-            renderTable();
-            renderPagination();
+            
+            renderTable(filteredMembers);
+            updateCounter(filteredMembers.length);
         }
-
+        
         function clearFilters() {
             document.getElementById('groupFilter').value = '';
             document.getElementById('courseFilter').value = '';
             document.getElementById('nameSearch').value = '';
-            filteredMembers = [...members];
-            currentPage = 1;
-            renderTable();
-            renderPagination();
-        }
-
-        function openModal(memberId = null) {
-            const modal = document.getElementById('memberModal');
-            const form = document.getElementById('memberForm');
-            if (memberId) {
-                const member = members.find(m => m.no_membro === memberId);
-                document.getElementById('modalTitle').textContent = 'Editar Membro';
-                form.no_membro.value = member.no_membro;
-                form.nome.value = member.nome;
-                form.grupo.value = member.grupo;
-                form.telefone.value = member.telefone;
-                form.fundamento.value = member.fundamento;
-                form.imersao.value = member.imersao;
-                form.voce_na_verdade.value = member.voce_na_verdade;
-                form.batismo.value = member.batismo;
-                form.identidade.value = member.identidade;
-                form.inspiracao.value = member.inspiracao;
-                form.dch.value = member.dch;
-                form.nt.value = member.nt;
-                form.rendicao.value = member.rendicao;
-            } else {
-                document.getElementById('modalTitle').textContent = 'Adicionar Membro';
-                form.reset();
-            }
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('memberModal').style.display = 'none';
-        }
-
-        document.getElementById('memberForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const memberData = Object.fromEntries(formData);
-            const method = memberData.no_membro ? 'PUT' : 'POST';
-            fetch(apiUrl, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(memberData)
-            })
-            .then(response => response.json())
-            .then(() => {
-                closeModal();
-                loadMembers();
-                alert('Membro salvo com sucesso!');
-            })
-            .catch(error => {
-                console.error('Erro ao salvar membro:', error);
-                alert('Erro ao salvar membro.');
-            });
-        });
-
-        function editMember(memberId) {
-            openModal(memberId);
-        }
-
-        function deleteMember(memberId) {
-            if (confirm('Tem certeza que deseja deletar este membro?')) {
-                fetch(`${apiUrl}?id=${memberId}`, { method: 'DELETE' })
-                .then(() => {
-                    loadMembers();
-                    alert('Membro deletado com sucesso!');
-                })
-                .catch(error => {
-                    console.error('Erro ao deletar membro:', error);
-                    alert('Erro ao deletar membro.');
-                });
-            }
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
+            filteredMembers = [...allMembers];
+            renderTable(filteredMembers);
+            updateCounter(filteredMembers.length);
         }
     </script>
 </body>
