@@ -5,70 +5,327 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Membros da Igreja</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4); }
-        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-        .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
-        input, select, button { margin: 5px; padding: 8px; }
-        #filter { margin-bottom: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #333;
+            color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .filters select, .filters input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .filters button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .filters button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .status-sim {
+            color: green;
+        }
+        .status-nao {
+            color: red;
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .pagination button:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover {
+            color: black;
+            cursor: pointer;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        form label {
+            margin-top: 10px;
+        }
+        form input, form select {
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        form button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #45a049;
+        }
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .dark-mode-toggle:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            table {
+                font-size: 14px;
+            }
+            th, td {
+                padding: 8px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Gerenciamento de Membros da Igreja</h1>
-    <input type="text" id="filter" placeholder="Filtrar por nome..." onkeyup="filterTable()">
-    <button onclick="openModal()">Adicionar Membro</button>
-    <table id="membersTable">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Cursos</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody id="membersBody">
-            <!-- Dados serão carregados dinamicamente -->
-        </tbody>
-    </table>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <div class="container">
+        <h1>Gerenciamento de Membros da Igreja</h1>
+        <div class="filters">
+            <select id="groupFilter">
+                <option value="">Todos os Grupos</option>
+                <option value="Líder Hub">Líder Hub</option>
+                <option value="Hype">Hype</option>
+                <option value="Play">Play</option>
+            </select>
+            <select id="courseFilter">
+                <option value="">Todos os Cursos</option>
+                <option value="fundamento">Fundamento</option>
+                <option value="imersao">Imersão</option>
+                <option value="voce_na_verdade">Você na Verdade</option>
+                <option value="batismo">Batismo</option>
+                <option value="identidade">Identidade</option>
+                <option value="inspiracao">Inspiração</option>
+                <option value="dch">DCH</option>
+                <option value="nt">NT</option>
+                <option value="rendicao">Rendição</option>
+            </select>
+            <input type="text" id="nameSearch" placeholder="Buscar por nome">
+            <button onclick="applyFilters()">Aplicar Filtros</button>
+            <button onclick="clearFilters()">Limpar Filtros</button>
+            <button onclick="openModal()">Adicionar Membro</button>
+        </div>
+        <table id="membersTable">
+            <thead>
+                <tr>
+                    <th>Nº Membro</th>
+                    <th>Nome</th>
+                    <th>Grupo</th>
+                    <th>Telefone</th>
+                    <th>Fundamento</th>
+                    <th>Imersão</th>
+                    <th>Você na Verdade</th>
+                    <th>Batismo</th>
+                    <th>Identidade</th>
+                    <th>Inspiração</th>
+                    <th>DCH</th>
+                    <th>NT</th>
+                    <th>Rendição</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="membersBody"></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+    </div>
 
     <div id="memberModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <h2 id="modalTitle">Adicionar Membro</h2>
             <form id="memberForm">
-                <input type="hidden" id="memberId">
-                <label for="name">Nome:</label>
-                <input type="text" id="name" required><br>
-                <label for="email">Email:</label>
-                <input type="email" id="email" required><br>
-                <label for="phone">Telefone:</label>
-                <input type="tel" id="phone" required><br>
-                <label>Cursos:</label><br>
-                <input type="checkbox" name="curso1" value="Curso 1"> Curso 1<br>
-                <input type="checkbox" name="curso2" value="Curso 2"> Curso 2<br>
-                <input type="checkbox" name="curso3" value="Curso 3"> Curso 3<br>
+                <label for="no_membro">Nº Membro:</label>
+                <input type="text" id="no_membro" name="no_membro" required>
+
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+
+                <label for="grupo">Grupo:</label>
+                <select id="grupo" name="grupo" required>
+                    <option value="Líder Hub">Líder Hub</option>
+                    <option value="Hype">Hype</option>
+                    <option value="Play">Play</option>
+                </select>
+
+                <label for="telefone">Telefone:</label>
+                <input type="text" id="telefone" name="telefone" pattern="\d{10,11}" title="Apenas números, 10 ou 11 dígitos" required>
+
+                <label for="fundamento">Fundamento:</label>
+                <select id="fundamento" name="fundamento">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="imersao">Imersão:</label>
+                <select id="imersao" name="imersao">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="voce_na_verdade">Você na Verdade:</label>
+                <select id="voce_na_verdade" name="voce_na_verdade">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="batismo">Batismo:</label>
+                <select id="batismo" name="batismo">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="identidade">Identidade:</label>
+                <select id="identidade" name="identidade">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="inspiracao">Inspiração:</label>
+                <select id="inspiracao" name="inspiracao">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="dch">DCH:</label>
+                <select id="dch" name="dch">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="nt">NT:</label>
+                <select id="nt" name="nt">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
+                <label for="rendicao">Rendição:</label>
+                <select id="rendicao" name="rendicao">
+                    <option value="">Não</option>
+                    <option value="Sim">Sim</option>
+                </select>
+
                 <button type="submit">Salvar</button>
             </form>
         </div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwDp2g--eUjynwswAER_MBdKs59mTVsgdcbZcJHSgQsb_pC1lALgv670OT5GsL9roP_UQ/exec';
+        const apiUrl = 'https://script.google.com/macros/s/AKfycbwDp2g--eUjynwswAER_MBdKs59mTVsgdcbZcJHSgQsb_pC1lALgv670OT5GsL9roP_UQ/exec';
         let members = [];
+        let filteredMembers = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
 
         document.addEventListener('DOMContentLoaded', loadMembers);
 
         function loadMembers() {
-            fetch(scriptURL + '?action=get')
+            fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
                     members = data;
+                    filteredMembers = [...members];
                     renderTable();
+                    renderPagination();
                 })
                 .catch(error => console.error('Erro ao carregar membros:', error));
         }
@@ -76,52 +333,99 @@
         function renderTable() {
             const tbody = document.getElementById('membersBody');
             tbody.innerHTML = '';
-            members.forEach(member => {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageMembers = filteredMembers.slice(start, end);
+
+            pageMembers.forEach(member => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${member.name}</td>
-                    <td>${member.email}</td>
-                    <td>${member.phone}</td>
-                    <td>${member.courses ? member.courses.join(', ') : ''}</td>
+                    <td>${member.no_membro}</td>
+                    <td>${member.nome}</td>
+                    <td>${member.grupo}</td>
+                    <td><a href="https://wa.me/55${member.telefone}" class="whatsapp-btn" target="_blank">WhatsApp</a></td>
+                    <td class="${member.fundamento === 'Sim' ? 'status-sim' : 'status-nao'}">${member.fundamento === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.imersao === 'Sim' ? 'status-sim' : 'status-nao'}">${member.imersao === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.voce_na_verdade === 'Sim' ? 'status-sim' : 'status-nao'}">${member.voce_na_verdade === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.batismo === 'Sim' ? 'status-sim' : 'status-nao'}">${member.batismo === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.identidade === 'Sim' ? 'status-sim' : 'status-nao'}">${member.identidade === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.inspiracao === 'Sim' ? 'status-sim' : 'status-nao'}">${member.inspiracao === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.dch === 'Sim' ? 'status-sim' : 'status-nao'}">${member.dch === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.nt === 'Sim' ? 'status-sim' : 'status-nao'}">${member.nt === 'Sim' ? '✅' : '❌'}</td>
+                    <td class="${member.rendicao === 'Sim' ? 'status-sim' : 'status-nao'}">${member.rendicao === 'Sim' ? '✅' : '❌'}</td>
                     <td>
-                        <button onclick="editMember('${member.id}')">Editar</button>
-                        <button onclick="deleteMember('${member.id}', '${member.name}')">Excluir</button>
-                        <button onclick="sendWhatsApp('${member.phone}')">WhatsApp</button>
+                        <button onclick="editMember('${member.no_membro}')">Editar</button>
+                        <button onclick="deleteMember('${member.no_membro}')">Deletar</button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        function filterTable() {
-            const filter = document.getElementById('filter').value.toLowerCase();
-            const rows = document.querySelectorAll('#membersBody tr');
-            rows.forEach(row => {
-                const name = row.cells[0].textContent.toLowerCase();
-                row.style.display = name.includes(filter) ? '' : 'none';
-            });
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                };
+                pagination.appendChild(button);
+            }
         }
 
-        function openModal(member = null) {
-            document.getElementById('memberModal').style.display = 'block';
-            if (member) {
+        function applyFilters() {
+            const group = document.getElementById('groupFilter').value;
+            const course = document.getElementById('courseFilter').value;
+            const name = document.getElementById('nameSearch').value.toLowerCase();
+
+            filteredMembers = members.filter(member => {
+                return (group === '' || member.grupo === group) &&
+                       (course === '' || member[course] === 'Sim') &&
+                       (name === '' || member.nome.toLowerCase().includes(name));
+            });
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        }
+
+        function clearFilters() {
+            document.getElementById('groupFilter').value = '';
+            document.getElementById('courseFilter').value = '';
+            document.getElementById('nameSearch').value = '';
+            filteredMembers = [...members];
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        }
+
+        function openModal(memberId = null) {
+            const modal = document.getElementById('memberModal');
+            const form = document.getElementById('memberForm');
+            if (memberId) {
+                const member = members.find(m => m.no_membro === memberId);
                 document.getElementById('modalTitle').textContent = 'Editar Membro';
-                document.getElementById('memberId').value = member.id;
-                document.getElementById('name').value = member.name;
-                document.getElementById('email').value = member.email;
-                document.getElementById('phone').value = member.phone;
-                // Reset checkboxes
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                if (member.courses) {
-                    member.courses.forEach(course => {
-                        const checkbox = document.querySelector(`input[name="${course}"]`);
-                        if (checkbox) checkbox.checked = true;
-                    });
-                }
+                form.no_membro.value = member.no_membro;
+                form.nome.value = member.nome;
+                form.grupo.value = member.grupo;
+                form.telefone.value = member.telefone;
+                form.fundamento.value = member.fundamento;
+                form.imersao.value = member.imersao;
+                form.voce_na_verdade.value = member.voce_na_verdade;
+                form.batismo.value = member.batismo;
+                form.identidade.value = member.identidade;
+                form.inspiracao.value = member.inspiracao;
+                form.dch.value = member.dch;
+                form.nt.value = member.nt;
+                form.rendicao.value = member.rendicao;
             } else {
                 document.getElementById('modalTitle').textContent = 'Adicionar Membro';
-                document.getElementById('memberForm').reset();
+                form.reset();
             }
+            modal.style.display = 'block';
         }
 
         function closeModal() {
@@ -130,56 +434,46 @@
 
         document.getElementById('memberForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const id = document.getElementById('memberId').value;
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const courses = Array.from(document.querySelectorAll('input[name]:checked')).map(cb => cb.value);
-            const member = { id, name, email, phone, courses };
-            const action = id ? 'update' : 'add';
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify({ action, member }),
-                headers: { 'Content-Type': 'application/json' }
+            const formData = new FormData(e.target);
+            const memberData = Object.fromEntries(formData);
+            const method = memberData.no_membro ? 'PUT' : 'POST';
+            fetch(apiUrl, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(memberData)
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadMembers();
-                    closeModal();
-                } else {
-                    alert('Erro ao salvar membro');
-                }
+            .then(() => {
+                closeModal();
+                loadMembers();
+                alert('Membro salvo com sucesso!');
             })
-            .catch(error => console.error('Erro:', error));
+            .catch(error => {
+                console.error('Erro ao salvar membro:', error);
+                alert('Erro ao salvar membro.');
+            });
         });
 
-        function editMember(id) {
-            const member = members.find(m => m.id === id);
-            openModal(member);
+        function editMember(memberId) {
+            openModal(memberId);
         }
 
-        function deleteMember(id, memberName) {
-            if (!confirm(`Tem certeza que deseja excluir o membro ${memberName}?`)) return;
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'delete', id }),
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        function deleteMember(memberId) {
+            if (confirm('Tem certeza que deseja deletar este membro?')) {
+                fetch(`${apiUrl}?id=${memberId}`, { method: 'DELETE' })
+                .then(() => {
                     loadMembers();
-                } else {
-                    alert('Erro ao excluir membro');
-                }
-            })
-            .catch(error => console.error('Erro:', error));
+                    alert('Membro deletado com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao deletar membro:', error);
+                    alert('Erro ao deletar membro.');
+                });
+            }
         }
 
-        function sendWhatsApp(phone) {
-            const url = `https://wa.me/${phone.replace(/\D/g, '')}`;
-            window.open(url, '_blank');
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
         }
     </script>
 </body>
