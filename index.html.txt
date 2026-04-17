@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Membros</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; color: #333; }<br/>
+        .container { max-width: 1200px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }<br/>
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }<br/>
+        .controls { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; align-items: center; }<br/>
+        .controls input, .controls select, .controls button { padding: 10px 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; }<br/>
+        .controls button { background-color: #28a745; color: white; cursor: pointer; border: none; transition: background-color 0.3s ease; }<br/>
+        .controls button:hover { background-color: #218838; }<br/>
+        #memberTable { width: 100%; border-collapse: collapse; margin-top: 20px; }<br/>
+        #memberTable th, #memberTable td { border: 1px solid #ddd; padding: 12px; text-align: left; }<br/>
+        #memberTable th { background-color: #e9ecef; color: #495057; font-weight: 600; }<br/>
+        #memberTable tr:nth-child(even) { background-color: #f8f9fa; }<br/>
+        #memberTable tr:hover { background-color: #e2e6ea; }<br/>
+        .whatsapp-btn { background-color: #25d366; color: white; padding: 8px 12px; border-radius: 5px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.9em; }<br/>
+        .whatsapp-btn:hover { background-color: #1da851; }<br/>
+        .whatsapp-btn img { width: 18px; height: 18px; }<br/>
+        .action-buttons button { margin-right: 5px; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }<br/>
+        .edit-btn { background-color: #007bff; color: white; border: none; }<br/>
+        .edit-btn:hover { background-color: #0056b3; }<br/>
+        .delete-btn { background-color: #dc3545; color: white; border: none; }<br/>
+        .delete-btn:hover { background-color: #c82333; }<br/>
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }<br/>
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 30px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; position: relative; }<br/>
+        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }<br/>
+        .close-button:hover, .close-button:focus { color: black; text-decoration: none; }<br/>
+        .modal-content form { display: flex; flex-direction: column; gap: 15px; }<br/>
+        .modal-content label { font-weight: 600; margin-bottom: 5px; }<br/>
+        .modal-content input[type="text"], .modal-content input[type="tel"], .modal-content select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; }<br/>
+        .modal-content button[type="submit"] { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em; margin-top: 20px; }<br/>
+        .modal-content button[type="submit"]:hover { background-color: #0056b3; }<br/>
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }<br/>
+        .checkbox-group label { display: flex; align-items: center; gap: 5px; font-weight: normal; }<br/>
+        .checkbox-group input[type="checkbox"] { transform: scale(1.2); }<br/>
+        .status-indicator { display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }<br/>
+        .status-indicator.yes { background-color: #28a745; }<br/>
+        .status-indicator.no { background-color: #dc3545; }<br/>
+        .status-indicator.unknown { background-color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciamento de Membros da Igreja</h1>
+
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Buscar por nome...">
+            <select id="groupFilter">
+                <option value="">Todos os Grupos</option>
+                <option value="Líder Hub">Líder Hub</option>
+                <option value="Hype">Hype</option>
+                <option value="Play">Play</option>
+                <!-- Adicione mais grupos conforme necessário -->
+            </select>
+            <select id="courseFilter">
+                <option value="">Todos os Cursos</option>
+                <option value="Fundamento">Fundamento</option>
+                <option value="Imersão">Imersão</option>
+                <option value="Você na Verdade">Você na Verdade</option>
+                <option value="Batismo">Batismo</option>
+                <option value="Identidade">Identidade</option>
+                <option value="Inspiração">Inspiração</option>
+                <option value="DCH">DCH</option>
+                <option value="NT">NT</option>
+                <option value="Rendição">Rendição</option>
+                <!-- Adicione mais cursos conforme necessário -->
+            </select>
+            <button id="addMemberBtn">Adicionar Novo Membro</button>
+        </div>
+
+        <table id="memberTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Grupo</th>
+                    <th>Telefone</th>
+                    <th>Fundamento</th>
+                    <th>Imersão</th>
+                    <th>Você na Verdade</th>
+                    <th>Batismo</th>
+                    <th>Identidade</th>
+                    <th>Inspiração</th>
+                    <th>DCH</th>
+                    <th>NT</th>
+                    <th>Rendição</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dados dos membros serão carregados aqui -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Membro -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modalTitle">Adicionar Novo Membro</h2>
+            <form id="memberForm">
+                <input type="hidden" id="memberId" name="ID">
+                <input type="hidden" id="rowIndex" name="rowIndex">
+
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="Nome" required>
+
+                <label for="grupo">Grupo:</label>
+                <input type="text" id="grupo" name="Grupo">
+
+                <label for="telefone">Telefone (apenas números, com DDD):</label><br/>
+                <input type="tel" id="telefone" name="Telefone" pattern="[0-9]{10,11}" placeholder="Ex: 5511987654321" required>
+
+                <label>Cursos e Classes:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="Fundamento" value="Sim"> Fundamento</label>
+                    <label><input type="checkbox" name="Imersão" value="Sim"> Imersão</label>
+                    <label><input type="checkbox" name="Você na Verdade" value="Sim"> Você na Verdade</label>
+                    <label><input type="checkbox" name="Batismo" value="Sim"> Batismo</label>
+                    <label><input type="checkbox" name="Identidade" value="Sim"> Identidade</label>
+                    <label><input type="checkbox" name="Inspiração" value="Sim"> Inspiração</label>
+                    <label><input type="checkbox" name="DCH" value="Sim"> DCH</label>
+                    <label><input type="checkbox" name="NT" value="Sim"> NT</label>
+                    <label><input type="checkbox" name="Rendição" value="Sim"> Rendição</label>
+                </div>
+
+                <button type="submit">Salvar Membro</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwDp2g--eUjynwswAER_MBdKs59mTVsgdcbZcJHSgQsb_pC1lALgv670OT5GsL9roP_UQ/exec'; // SUBSTITUA PELA URL DO SEU APPS SCRIPT
+        let membersData = [];
+        const courseColumns = ["Fundamento", "Imersão", "Você na Verdade", "Batismo", "Identidade", "Inspiração", "DCH", "NT", "Rendição"];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchMembers();
+            setupEventListeners();
+        });
+
+        async function fetchMembers() {
+            try {
+                const response = await fetch(WEB_APP_URL);
+                membersData = await response.json();
+                renderTable(membersData);
+            } catch (error) {
+                console.error('Erro ao buscar membros:', error);
+                alert('Não foi possível carregar os dados dos membros. Verifique a URL do backend.');
+            }
+        }
+
+        function renderTable(membersToRender) {
+            const tbody = document.querySelector('#memberTable tbody');
+            tbody.innerHTML = ''; // Limpa a tabela antes de renderizar
+
+            membersToRender.forEach(member => {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = member.ID;
+                row.insertCell().textContent = member.Nome;
+                row.insertCell().textContent = member.Grupo;
+                
+                const phoneCell = row.insertCell();
+                if (member.Telefone) {
+                    const whatsappLink = document.createElement('a');
+                    whatsappLink.href = `https://wa.me/${member.Telefone}`;
+                    whatsappLink.target = '_blank';
+                    whatsappLink.className = 'whatsapp-btn';
+                    whatsappLink.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp"> ${member.Telefone}`;
+                    phoneCell.appendChild(whatsappLink);
+                } else {
+                    phoneCell.textContent = 'N/A';
+                }
+
+                courseColumns.forEach(course => {
+                    const cell = row.insertCell();
+                    const status = String(member[course]).toLowerCase();
+                    const indicator = document.createElement('span');
+                    indicator.className = 'status-indicator';
+                    if (status === 'sim' || status === 'x') {
+                        indicator.classList.add('yes');
+                        indicator.title = 'Concluído';
+                    } else if (status === 'não' || status === '') {
+                        indicator.classList.add('no');
+                        indicator.title = 'Não Concluído';
+                    } else {
+                        indicator.classList.add('unknown');
+                        indicator.title = 'Status Desconhecido';
+                    }
+                    cell.appendChild(indicator);
+                });
+
+                const actionsCell = row.insertCell();
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Editar';
+                editBtn.className = 'edit-btn';
+                editBtn.onclick = () => openMemberModalForEdit(member);
+                actionsCell.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Excluir';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = () => deleteMember(member.rowIndex, member.Nome);
+                actionsCell.appendChild(deleteBtn);
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('keyup', applyFilters);
+            document.getElementById('groupFilter').addEventListener('change', applyFilters);
+            document.getElementById('courseFilter').addEventListener('change', applyFilters);
+            document.getElementById('addMemberBtn').addEventListener('click', openAddMemberModal);
+            document.querySelector('.close-button').addEventListener('click', closeMemberModal);
+            window.addEventListener('click', (event) => {
+                if (event.target == document.getElementById('memberModal')) {
+                    closeMemberModal();
+                }
+            });
+            document.getElementById('memberForm').addEventListener('submit', handleMemberFormSubmit);
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const groupFilter = document.getElementById('groupFilter').value;
+            const courseFilter = document.getElementById('courseFilter').value;
+
+            const filteredMembers = membersData.filter(member => {
+                const matchesSearch = member.Nome.toLowerCase().includes(searchTerm);
+                const matchesGroup = groupFilter === '' || member.Grupo === groupFilter;
+                const matchesCourse = courseFilter === '' || 
+                                      (courseColumns.includes(courseFilter) && 
+                                       (String(member[courseFilter]).toLowerCase() === 'sim' || String(member[courseFilter]).toLowerCase() === 'x'));
+                return matchesSearch && matchesGroup && matchesCourse;
+            });
+            renderTable(filteredMembers);
+        }
+
+        function openAddMemberModal() {
+            document.getElementById('modalTitle').textContent = 'Adicionar Novo Membro';
+            document.getElementById('memberForm').reset();
+            document.getElementById('memberId').value = ''; // Limpa o ID para adicionar
+            document.getElementById('rowIndex').value = ''; // Limpa o rowIndex
+            document.getElementById('memberModal').style.display = 'block';
+        }
+
+        function openMemberModalForEdit(member) {
+            document.getElementById('modalTitle').textContent = 'Editar Membro';
+            document.getElementById('memberForm').reset();
+            
+            document.getElementById('memberId').value = member.ID;
+            document.getElementById('rowIndex').value = member.rowIndex; // Guarda o rowIndex para atualização
+            document.getElementById('nome').value = member.Nome;
+            document.getElementById('grupo').value = member.Grupo;
+            document.getElementById('telefone').value = member.Telefone;
+
+            courseColumns.forEach(course => {
+                const checkbox = document.querySelector(`input[name="${course}"]`);
+                if (checkbox) {
+                    checkbox.checked = (String(member[course]).toLowerCase() === 'sim' || String(member[course]).toLowerCase() === 'x');
+                }
+            });
+
+            document.getElementById('memberModal').style.display = 'block';
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').style.display = 'none';
+        }
+
+        async function handleMemberFormSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const member = {};
+            formData.forEach((value, key) => {
+                if (courseColumns.includes(key)) {
+                    member[key] = value === 'Sim' ? 'Sim' : 'Não'; // Garante 'Sim' ou 'Não' para cursos
+                } else {
+                    member[key] = value;
+                }
+            });
+
+            const memberId = document.getElementById('memberId').value;
+            const rowIndex = document.getElementById('rowIndex').value;
+            let action = memberId ? 'update' : 'add';
+
+            // Se for adicionar, precisamos gerar um novo ID
+            if (action === 'add') {
+                const maxId = membersData.reduce((max, m) => Math.max(max, parseInt(m.ID || 0)), 0);
+                member.ID = (maxId + 1).toString();
+            }
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',<br/>
+                    headers: {<br/>
+                        'Content-Type': 'text/plain;charset=utf-8', // Apps Script exige text/plain
+                    },
+                    body: JSON.stringify({ action: action, member: member, rowIndex: rowIndex }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    closeMemberModal();
+                    fetchMembers(); // Recarrega os dados
+                } else {
+                    alert('Erro ao salvar membro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao salvar membro:', error);
+                alert('Erro de comunicação com o servidor ao salvar membro.');
+            }
+        }
+
+        async function deleteMember(rowIndex, memberName) {
+            if (!confirm(`Tem certeza que deseja excluir o membro ${memberName}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',<br/>
+                    headers: {<br/>
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify({ action: 'delete', rowIndex: rowIndex }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    fetchMembers(); // Recarrega os dados
+                } else {
+                    alert('Erro ao excluir membro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao excluir membro:', error);
+                alert('Erro de comunicação com o servidor ao excluir membro.');
+            }
+        }
+    </script>
+</body>
+</html>
